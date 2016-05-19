@@ -32,7 +32,7 @@ npm install -g mkpdf
 
 ### Usage
 
-```bash
+```
 Usage: mkpdf [options] <markdown-files...>
 
 Options:
