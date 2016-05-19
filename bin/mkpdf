@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+
+var mkpdf = require('../')
+var program = require('commander')
+
+program.version(require('../package.json').version)
+	.usage('[options] <markdown-files...>')
+	.option('-f, --paper-format [format]', '"A3", "A4", "A5", "Legal", "Letter" or "Tabloid"')
+	.option('-r, --paper-orientation [orientation]', '"portrait" or "landscape"')
+	.option('-b, --paper-border [measurement]', 'Supported dimension units are: "mm", "cm", "in", "px"')
+	.option('-o, --out [path]', 'Path for saving the PDF')
+	.option('--disable-toc', 'Don\'t create a table of contents')
+	.option('--toc-title [title]', 'The table of contents title. Defaults to "Table of Contents"')
+	.option('--css-path [path]', 'Path to custom CSS file')
+	.option('--highlight-css-path [path]', 'Path to custom highlight.js CSS file')
+	.option('--html-path [path]', 'Path to custom HTML file')
+	.parse(process.argv)
+
+if (!program.args.length) {
+	program.help()
+}
+
+program.out = program.out || program.args[0].replace(/\.m(ark)?d(own)?/ig, '.pdf')
+
+var opts = {
+	paperFormat: program.paperFormat,
+	paperOrientation: program.paperOrientation,
+	paperBorder: program.paperBorder,
+	cssPath: program.cssPath,
+	highlightCssPath: program.highlightCssPath,
+	htmlPath: program.htmlPath,
+	disableToc: program.disableToc,
+	tocTitle: program.tocTitle
+}
+
+require('del')(program.out).then(function () {
+	if (program.args.length === 1) {
+		return mkpdf(opts).from.paths(program.args).to(program.out, function (err) {
+			if (err) {
+				throw err
+			}
+		})
+	}
+	mkpdf(opts).concat.from.paths(program.args).to(program.out, function (err) {
+		if (err) {
+			throw err
+		}
+	})
+})
